@@ -9,8 +9,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-
-	// Import godotenv package
 	_ "github.com/lib/pq"
 )
 
@@ -25,9 +23,6 @@ func main() {
 
 	// Get database connection string from environment variable
 	connectionString := os.Getenv("DB_CONNECTION_URL")
-	if connectionString == "" {
-		connectionString = "postgresql://psql-db_owner:l1C0IkXSrKqz@ep-fragrant-glade-a2d997l1.eu-central-1.aws.neon.tech/psql-db?sslmode=require"
-	}
 
 	// Initialize the database connection
 	var err error
