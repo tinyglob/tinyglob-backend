@@ -6,25 +6,24 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors" // Import rs/cors for CORS handling
 )
 
 var db *sql.DB
 
 func main() {
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	// Get database connection string from environment variable
 	connectionString := os.Getenv("DB_CONNECTION_URL")
 
-	// Initialize the database connection
 	var err error
 	db, err = sql.Open("postgres", connectionString)
 	if err != nil {
@@ -32,7 +31,6 @@ func main() {
 	}
 	defer db.Close()
 
-	// Verify the database connection
 	err = db.Ping()
 	if err != nil {
 		log.Fatal(err)
@@ -40,6 +38,13 @@ func main() {
 
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
+
+	// Create a CORS middleware instance with default options
+	corsMiddleware := cors.Default()
+
+	// Use CORS middleware with your router
+	router.Use(corsMiddleware.Handler)
+
 	router.Get("/", homeHandler)
 	router.Get("/jobs", jobsHandler)
 
@@ -47,14 +52,11 @@ func main() {
 	http.ListenAndServe(":"+port, router)
 }
 
-// Rest of your handlers remain the same...
-
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello, world!"))
 }
 
 func jobsHandler(w http.ResponseWriter, r *http.Request) {
-	// Query jobs from the database
 	rows, err := db.Query("SELECT * FROM jobs")
 	if err != nil {
 		http.Error(w, "Failed to query jobs", http.StatusInternalServerError)
@@ -63,35 +65,39 @@ func jobsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	// Define a struct to represent a job
 	type Job struct {
-		JobID       int     `json:"job_id"`
-		Title       string  `json:"title"`
-		Description string  `json:"description"`
-		Latitude    float64 `json:"latitude"`
-		Longitude   float64 `json:"longitude"`
-		Company     string  `json:"company"`
-		Salary      float64 `json:"salary"`
-		PostedDate  string  `json:"posted_date"`
-		Deadline    string  `json:"deadline_date"`
+		JobID          int      `json:"job_id"`
+		VideoID        int      `json:"video_id"`
+		VideoUrl       int      `json:"video_url"`
+		Title          string   `json:"title"`
+		Description    string   `json:"description"`
+		Continent      string   `json:"continent"`
+		Country        string   `json:"country"`
+		City           string   `json:"city"`
+		Company        string   `json:"company"`
+		CompanyLogoUrl string   `json:"company_logo_url"`
+		Salary         float64  `json:"salary"`
+		Currency       string   `json:"currency"`
+		RequiredSkills []string `json:"required_skills"`
+		PostedDate     string   `json:"posted_date"`
+		Deadline       string   `json:"deadline_date"`
 	}
 
-	// Create a slice to hold the job data
 	var jobs []Job
 
-	// Iterate over the rows and populate the job slice
 	for rows.Next() {
 		var job Job
-		err := rows.Scan(&job.JobID, &job.Title, &job.Description, &job.Latitude, &job.Longitude, &job.Company, &job.Salary, &job.PostedDate, &job.Deadline)
+		var requiredSkillsString string
+		err := rows.Scan(&job.JobID, &job.VideoID, &job.VideoUrl, &job.Title, &job.Description, &job.Continent, &job.Country, &job.City, &job.Company, &job.CompanyLogoUrl, &job.Salary, &job.Currency, &requiredSkillsString, &job.PostedDate, &job.Deadline)
 		if err != nil {
 			http.Error(w, "Failed to scan row", http.StatusInternalServerError)
 			log.Println("Failed to scan row:", err)
 			return
 		}
+		job.RequiredSkills = strings.Split(requiredSkillsString, ",") // Split the string into an array of strings
 		jobs = append(jobs, job)
 	}
 
-	// Marshal the job slice into JSON format
 	jsonData, err := json.Marshal(jobs)
 	if err != nil {
 		http.Error(w, "Failed to marshal JSON", http.StatusInternalServerError)
@@ -99,9 +105,6 @@ func jobsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set the Content-Type header to application/json
 	w.Header().Set("Content-Type", "application/json")
-
-	// Write the JSON data to the response
 	w.Write(jsonData)
 }
