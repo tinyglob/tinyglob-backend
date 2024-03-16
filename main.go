@@ -10,16 +10,17 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/joho/godotenv" // Import godotenv package
+	// Import godotenv package
 	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
 
 func main() {
-	// Load environment variables from .env file
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
 	}
 
 	// Get database connection string from environment variable
@@ -45,7 +46,7 @@ func main() {
 	router.Get("/jobs", jobsHandler)
 
 	log.Println("Server started on port 8080")
-	http.ListenAndServe(":8080", router)
+	http.ListenAndServe(":"+port, router)
 }
 
 // Rest of your handlers remain the same...
