@@ -57,7 +57,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func jobsHandler(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT * FROM jobs")
+	rows, err := db.Query("SELECT job_id, video_id, video_url, title, description, country, city, company, salary, currency, required_skills, posted_date, deadline_date FROM jobs")
 	if err != nil {
 		http.Error(w, "Failed to query jobs", http.StatusInternalServerError)
 		log.Println("Failed to query jobs:", err)
@@ -68,12 +68,12 @@ func jobsHandler(w http.ResponseWriter, r *http.Request) {
 	type Job struct {
 		JobID          int      `json:"job_id"`
 		VideoID        int      `json:"video_id"`
-		VideoUrl       int      `json:"video_url"`
+		VideoUrl       string   `json:"video_url"`
 		Title          string   `json:"title"`
 		Description    string   `json:"description"`
-		Continent      string   `json:"continent"`
 		Country        string   `json:"country"`
 		City           string   `json:"city"`
+		Continent      string   `json:"continent"`
 		Company        string   `json:"company"`
 		CompanyLogoUrl string   `json:"company_logo_url"`
 		Salary         float64  `json:"salary"`
@@ -88,7 +88,7 @@ func jobsHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var job Job
 		var requiredSkillsString string
-		err := rows.Scan(&job.JobID, &job.VideoID, &job.VideoUrl, &job.Title, &job.Description, &job.Continent, &job.Country, &job.City, &job.Company, &job.CompanyLogoUrl, &job.Salary, &job.Currency, &requiredSkillsString, &job.PostedDate, &job.Deadline)
+		err := rows.Scan(&job.JobID, &job.VideoID, &job.VideoUrl, &job.Title, &job.Description, &job.Country, &job.City, &job.Company, &job.Salary, &job.Currency, &requiredSkillsString, &job.PostedDate, &job.Deadline)
 		if err != nil {
 			http.Error(w, "Failed to scan row", http.StatusInternalServerError)
 			log.Println("Failed to scan row:", err)
