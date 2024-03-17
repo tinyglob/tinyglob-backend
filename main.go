@@ -62,7 +62,7 @@ func main() {
 
 	// Routes
 	router.Get("/", getRootHandler)
-	router.Get("/jobs", getAllJobsHandler)
+	router.Get("/jobs", getJobCountByContinentHandler)
 	router.Get("/jobs/id/{id}", getJobByIDHandler)                       // Specify route pattern with "id" parameter
 	router.Get("/jobs/continent/{continent}", getJobsByContinentHandler) // Specify route pattern with "continent" parameter
 
@@ -134,6 +134,40 @@ func getJobByIDHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Convert into JSON format
 	jsonData, err := json.Marshal(job)
+	if err != nil {
+		http.Error(w, "Failed to marshal JSON", http.StatusInternalServerError)
+		log.Println("Failed to marshal JSON:", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
+}
+
+func getJobCountByContinentHandler(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("SELECT continent, COUNT(*) AS job_count FROM jobs GROUP BY continent")
+	if err != nil {
+		http.Error(w, "Failed to query job counts", http.StatusInternalServerError)
+		log.Println("Failed to query job counts:", err)
+		return
+	}
+	defer rows.Close()
+
+	continentCounts := make(map[string]int)
+
+	for rows.Next() {
+		var continent string
+		var count int
+		err := rows.Scan(&continent, &count)
+		if err != nil {
+			http.Error(w, "Failed to scan row", http.StatusInternalServerError)
+			log.Println("Failed to scan row:", err)
+			return
+		}
+		continentCounts[continent] = count
+	}
+
+	jsonData, err := json.Marshal(continentCounts)
 	if err != nil {
 		http.Error(w, "Failed to marshal JSON", http.StatusInternalServerError)
 		log.Println("Failed to marshal JSON:", err)
