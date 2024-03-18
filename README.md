@@ -10,9 +10,9 @@ Back-end Language - https://go.dev/ <br />
 
 ### API
 
-```console
-router.Get("/", getRootHandler)
-router.Get("/jobs", getJobCountByContinentHandler)
-router.Get("/jobs/continent/{continent}", getJobsByContinentHandler)
-router.Get("/jobs/id/{id}", getJobByIDHandler)
+```
+router.Get("/")
+router.Get("/jobs")
+router.Get("/jobs/id/{id}")
+router.Get("/jobs/continent/{continent}")
 ```
