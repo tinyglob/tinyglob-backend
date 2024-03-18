@@ -1,6 +1,6 @@
 ### URL
 
-https://whycareer-backend-production-d8e4.up.railway.app/
+https://tinyglob-backend-production.up.railway.app/
 
 ### Tech
 
