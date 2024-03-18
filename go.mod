@@ -1,4 +1,4 @@
-module github.com/garbalau-github/orders-api
+module tinyglob-backend
 
 go 1.20
 
