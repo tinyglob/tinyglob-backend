@@ -34,7 +34,7 @@ func GetJobById(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
 	row := stmt.QueryRow(jobIDInt)
 
 	var job types.Job
-	err = row.Scan(&job.JobID, &job.VideoID, &job.VideoUrl, &job.Title, &job.Description, &job.Continent, &job.Country, &job.City, &job.Company, &job.Salary, &job.Currency, &job.PostedDate, &job.Deadline)
+	err = row.Scan(&job.JobID, &job.VideoID, &job.VideoUrl, &job.Title, &job.Description, &job.Continent, &job.Country, &job.Category, &job.City, &job.Company, &job.StartSalary, &job.EndSalary, &job.Currency, &job.PostedDate, &job.Deadline)
 	if err != nil {
 		http.Error(w, "Failed to retrieve job", http.StatusInternalServerError)
 		log.Println("Failed to retrieve job:", err)
@@ -111,16 +111,16 @@ func GetJobsByContinent(db_instance *sql.DB, w http.ResponseWriter, r *http.Requ
 
 	helpers.RespondWithJSON(w, http.StatusOK, countryCounts)
 }
+
 func GetJobsByCountry(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
-	continent := chi.URLParam(r, "continent")
 	country := chi.URLParam(r, "country")
 
-	if continent == "" || country == "" {
-		http.Error(w, "Continent and country parameters are required", http.StatusBadRequest)
+	if country == "" {
+		http.Error(w, "Country parameter is required", http.StatusBadRequest)
 		return
 	}
 
-	stmt, err := db_instance.Prepare("SELECT * FROM jobs WHERE continent = $1 AND country = $2")
+	stmt, err := db_instance.Prepare("SELECT * FROM jobs WHERE LOWER(country) = LOWER($1)")
 	if err != nil {
 		http.Error(w, "Failed to prepare SQL statement", http.StatusInternalServerError)
 		log.Println("Failed to prepare SQL statement:", err)
@@ -128,7 +128,7 @@ func GetJobsByCountry(db_instance *sql.DB, w http.ResponseWriter, r *http.Reques
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(continent, country)
+	rows, err := stmt.Query(country)
 	if err != nil {
 		http.Error(w, "Failed to query jobs", http.StatusInternalServerError)
 		log.Println("Failed to query jobs:", err)
@@ -140,12 +140,14 @@ func GetJobsByCountry(db_instance *sql.DB, w http.ResponseWriter, r *http.Reques
 
 	for rows.Next() {
 		var job types.Job
-		err := rows.Scan(&job.JobID, &job.VideoID, &job.VideoUrl, &job.Title, &job.Description, &job.Continent, &job.Country, &job.City, &job.Company, &job.CompanyLogoUrl, &job.Salary, &job.Currency)
+
+		err = rows.Scan(&job.JobID, &job.VideoID, &job.VideoUrl, &job.Title, &job.Description, &job.Country, &job.Category, &job.City, &job.Continent, &job.Company, &job.CompanyLogoUrl, &job.StartSalary, &job.EndSalary, &job.Currency, &job.PostedDate, &job.Deadline)
 		if err != nil {
 			http.Error(w, "Failed to scan row", http.StatusInternalServerError)
 			log.Println("Failed to scan row:", err)
 			return
 		}
+
 		jobs = append(jobs, job)
 	}
 

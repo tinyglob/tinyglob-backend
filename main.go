@@ -36,16 +36,16 @@ func main() {
 		handlers.GetJobsCount(db_instance, w, r)
 	})
 
-	router.Get("/jobs/id/{id}", func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetJobById(db_instance, w, r)
-	})
-
 	router.Get("/jobs/continent/{continent}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetJobsByContinent(db_instance, w, r)
 	})
 
-	router.Get("/jobs/continent/{continent}/{country}", func(w http.ResponseWriter, r *http.Request) {
+	router.Get("/jobs/country/{country}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetJobsByCountry(db_instance, w, r)
+	})
+
+	router.Get("/jobs/id/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetJobById(db_instance, w, r)
 	})
 
 	log.Printf("Server is started on port %s", port)
