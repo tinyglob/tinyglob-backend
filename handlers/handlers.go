@@ -79,7 +79,7 @@ func GetJobsByContinent(db_instance *sql.DB, w http.ResponseWriter, r *http.Requ
 
 	continent = strings.ToLower(continent)
 
-	stmt, err := db_instance.Prepare("SELECT job_id, video_id, video_url, title, description, continent, country, city, company, company_logo_url, salary, currency FROM jobs WHERE LOWER(continent) = $1")
+	stmt, err := db_instance.Prepare("SELECT country, COUNT(*) AS job_count FROM jobs WHERE LOWER(continent) = $1 GROUP BY country")
 	if err != nil {
 		http.Error(w, "Failed to prepare SQL statement", http.StatusInternalServerError)
 		log.Println("Failed to prepare SQL statement:", err)
@@ -88,6 +88,47 @@ func GetJobsByContinent(db_instance *sql.DB, w http.ResponseWriter, r *http.Requ
 	defer stmt.Close()
 
 	rows, err := stmt.Query(continent)
+	if err != nil {
+		http.Error(w, "Failed to query jobs", http.StatusInternalServerError)
+		log.Println("Failed to query jobs:", err)
+		return
+	}
+	defer rows.Close()
+
+	countryCounts := make(map[string]int)
+
+	for rows.Next() {
+		var country string
+		var count int
+		err := rows.Scan(&country, &count)
+		if err != nil {
+			http.Error(w, "Failed to scan row", http.StatusInternalServerError)
+			log.Println("Failed to scan row:", err)
+			return
+		}
+		countryCounts[country] = count
+	}
+
+	helpers.RespondWithJSON(w, http.StatusOK, countryCounts)
+}
+func GetJobsByCountry(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
+	continent := chi.URLParam(r, "continent")
+	country := chi.URLParam(r, "country")
+
+	if continent == "" || country == "" {
+		http.Error(w, "Continent and country parameters are required", http.StatusBadRequest)
+		return
+	}
+
+	stmt, err := db_instance.Prepare("SELECT * FROM jobs WHERE continent = $1 AND country = $2")
+	if err != nil {
+		http.Error(w, "Failed to prepare SQL statement", http.StatusInternalServerError)
+		log.Println("Failed to prepare SQL statement:", err)
+		return
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(continent, country)
 	if err != nil {
 		http.Error(w, "Failed to query jobs", http.StatusInternalServerError)
 		log.Println("Failed to query jobs:", err)

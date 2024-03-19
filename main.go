@@ -44,6 +44,10 @@ func main() {
 		handlers.GetJobsByContinent(db_instance, w, r)
 	})
 
+	router.Get("/jobs/continent/{continent}/{country}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetJobsByCountry(db_instance, w, r)
+	})
+
 	log.Printf("Server is started on port %s", port)
 	http.ListenAndServe(":"+port, router)
 }
