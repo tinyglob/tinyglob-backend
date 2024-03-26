@@ -11,6 +11,7 @@ import (
 
 	"tinyglob-backend/database"
 	"tinyglob-backend/handlers"
+	middlewares "tinyglob-backend/middleware" // Import your custom middleware package
 )
 
 func main() {
@@ -27,11 +28,21 @@ func main() {
 	router.Use(middleware.Logger)
 	router.Use(corsMiddleware.Handler)
 
-	// Routes
+	// Apply AuthMiddleware to routes that require authentication
+	router.Group(func(r chi.Router) {
+		r.Use(middlewares.AuthMiddleware)
+		// Protected routes
+		r.Get("/protected", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("This is a protected route\n"))
+		})
+	})
+
+	// Generic
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Welcome to TinyGlob!\n"))
 	})
 
+	// Jobs
 	router.Get("/jobs", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetJobsCount(db_instance, w, r)
 	})
@@ -46,6 +57,19 @@ func main() {
 
 	router.Get("/jobs/id/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetJobById(db_instance, w, r)
+	})
+
+	// User
+	router.Post("/register", func(w http.ResponseWriter, r *http.Request) {
+		handlers.Register(db_instance, w, r)
+	})
+
+	router.Post("/login", func(w http.ResponseWriter, r *http.Request) {
+		handlers.Login(db_instance, w, r)
+	})
+
+	router.Post("/token", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GenerateToken(db_instance, w, r)
 	})
 
 	log.Printf("Server is started on port %s", port)
