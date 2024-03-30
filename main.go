@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/cors"
 
+	handlers "tinyglob-backend/controllers"
 	"tinyglob-backend/database"
-	"tinyglob-backend/handlers"
 	middlewares "tinyglob-backend/middleware" // Import your custom middleware package
 )
 

@@ -23,7 +23,7 @@ func GetJobById(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt, err := db_instance.Prepare("SELECT job_id, video_id, video_url, title, description, continent, country, city, company, salary, currency, posted_date, deadline_date FROM jobs WHERE job_id = $1")
+	stmt, err := db_instance.Prepare("SELECT job_id, video_id, video_url, title, description, continent, country, category, city, company, start_salary, end_salary, currency, posted_date, deadline_date FROM jobs WHERE job_id = $1")
 	if err != nil {
 		http.Error(w, "Failed to prepare SQL statement", http.StatusInternalServerError)
 		log.Println("Failed to prepare SQL statement:", err)
@@ -34,7 +34,7 @@ func GetJobById(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
 	row := stmt.QueryRow(jobIDInt)
 
 	var job types.Job
-	err = row.Scan(&job.JobID, &job.VideoID, &job.VideoUrl, &job.Title, &job.Description, &job.Continent, &job.Country, &job.Category, &job.City, &job.Company, &job.StartSalary, &job.EndSalary, &job.Currency, &job.PostedDate, &job.Deadline)
+	err = row.Scan(&job.JobID, &job.VideoID, &job.VideoUrl, &job.Title, &job.Description, &job.Country, &job.Category, &job.City, &job.Continent, &job.Company, &job.CompanyLogoUrl, &job.StartSalary, &job.EndSalary, &job.Currency, &job.PostedDate, &job.Deadline)
 	if err != nil {
 		http.Error(w, "Failed to retrieve job", http.StatusInternalServerError)
 		log.Println("Failed to retrieve job:", err)
@@ -79,7 +79,7 @@ func GetJobsByContinent(db_instance *sql.DB, w http.ResponseWriter, r *http.Requ
 
 	continent = strings.ToLower(continent)
 
-	stmt, err := db_instance.Prepare("SELECT country, COUNT(*) AS job_count FROM jobs WHERE LOWER(continent) = $1 GROUP BY country")
+	stmt, err := db_instance.Prepare("SELECT * FROM jobs WHERE LOWER(continent) = $1")
 	if err != nil {
 		http.Error(w, "Failed to prepare SQL statement", http.StatusInternalServerError)
 		log.Println("Failed to prepare SQL statement:", err)
@@ -95,21 +95,21 @@ func GetJobsByContinent(db_instance *sql.DB, w http.ResponseWriter, r *http.Requ
 	}
 	defer rows.Close()
 
-	countryCounts := make(map[string]int)
+	var jobs []types.Job
 
 	for rows.Next() {
-		var country string
-		var count int
-		err := rows.Scan(&country, &count)
+		var job types.Job
+		err = rows.Scan(&job.JobID, &job.VideoID, &job.VideoUrl, &job.Title, &job.Description, &job.Country, &job.Category, &job.City, &job.Continent, &job.Company, &job.CompanyLogoUrl, &job.StartSalary, &job.EndSalary, &job.Currency, &job.PostedDate, &job.Deadline)
 		if err != nil {
 			http.Error(w, "Failed to scan row", http.StatusInternalServerError)
 			log.Println("Failed to scan row:", err)
 			return
 		}
-		countryCounts[country] = count
+
+		jobs = append(jobs, job)
 	}
 
-	helpers.RespondWithJSON(w, http.StatusOK, countryCounts)
+	helpers.RespondWithJSON(w, http.StatusOK, jobs)
 }
 
 func GetJobsByCountry(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
