@@ -23,7 +23,7 @@ func GetJobById(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt, err := db_instance.Prepare("SELECT job_id, video_id, video_url, title, description, continent, country, category, city, company, start_salary, end_salary, currency, posted_date, deadline_date FROM jobs WHERE job_id = $1")
+	stmt, err := db_instance.Prepare("SELECT job_id, video_id, video_url, title, description, country, category, city, continent, company, company_logo_url, start_salary, end_salary, currency, posted_date, deadline_date FROM jobs WHERE job_id = $1")
 	if err != nil {
 		http.Error(w, "Failed to prepare SQL statement", http.StatusInternalServerError)
 		log.Println("Failed to prepare SQL statement:", err)
