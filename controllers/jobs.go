@@ -1,4 +1,4 @@
-package handlers
+package controllers
 
 import (
 	"database/sql"
@@ -6,11 +6,10 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
-
 	"tinyglob-backend/helpers"
 	"tinyglob-backend/types"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func GetJobById(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
