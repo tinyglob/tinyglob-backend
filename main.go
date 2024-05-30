@@ -4,18 +4,17 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"tinyglob-backend/controllers"
+	"tinyglob-backend/db"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/cors"
-
-	controllers "tinyglob-backend/controllers"
-	database "tinyglob-backend/database"
-	middlewares "tinyglob-backend/middlewares"
 )
 
 func main() {
-	db_instance := database.InitDB()
+
+	db_instance := db.InitDB()
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -26,13 +25,6 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Use(corsMiddleware.Handler)
-
-	router.Group(func(r chi.Router) {
-		r.Use(middlewares.AuthMiddleware)
-		r.Get("/protected", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("This is a protected route\n"))
-		})
-	})
 
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Welcome to TinyGlob!\n"))
@@ -52,18 +44,6 @@ func main() {
 
 	router.Get("/jobs/id/{id}", func(w http.ResponseWriter, r *http.Request) {
 		controllers.GetJobById(db_instance, w, r)
-	})
-
-	router.Post("/register", func(w http.ResponseWriter, r *http.Request) {
-		controllers.Register(db_instance, w, r)
-	})
-
-	router.Post("/login", func(w http.ResponseWriter, r *http.Request) {
-		controllers.Login(db_instance, w, r)
-	})
-
-	router.Post("/token", func(w http.ResponseWriter, r *http.Request) {
-		controllers.GenerateToken(db_instance, w, r)
 	})
 
 	log.Printf("Server is started on port %s", port)

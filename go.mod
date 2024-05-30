@@ -8,8 +8,3 @@ require (
 )
 
 require github.com/rs/cors v1.10.1
-
-require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	golang.org/x/crypto v0.21.0
-)

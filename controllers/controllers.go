@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"tinyglob-backend/helpers"
 	"tinyglob-backend/types"
+	"tinyglob-backend/utils"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -40,7 +40,7 @@ func GetJobById(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helpers.RespondWithJSON(w, http.StatusOK, job)
+	utils.RespondWithJSON(w, http.StatusOK, job)
 }
 
 func GetJobsCount(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
@@ -66,7 +66,7 @@ func GetJobsCount(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
 		continentCounts[continent] = count
 	}
 
-	helpers.RespondWithJSON(w, http.StatusOK, continentCounts)
+	utils.RespondWithJSON(w, http.StatusOK, continentCounts)
 }
 
 func GetJobsByContinent(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
@@ -108,7 +108,7 @@ func GetJobsByContinent(db_instance *sql.DB, w http.ResponseWriter, r *http.Requ
 		jobs = append(jobs, job)
 	}
 
-	helpers.RespondWithJSON(w, http.StatusOK, jobs)
+	utils.RespondWithJSON(w, http.StatusOK, jobs)
 }
 
 func GetJobsByCountry(db_instance *sql.DB, w http.ResponseWriter, r *http.Request) {
@@ -150,5 +150,5 @@ func GetJobsByCountry(db_instance *sql.DB, w http.ResponseWriter, r *http.Reques
 		jobs = append(jobs, job)
 	}
 
-	helpers.RespondWithJSON(w, http.StatusOK, jobs)
+	utils.RespondWithJSON(w, http.StatusOK, jobs)
 }
