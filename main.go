@@ -46,6 +46,6 @@ func main() {
 		controllers.GetJobById(db_instance, w, r)
 	})
 
-	log.Printf("Server is started on port %s", port)
+	log.Printf("Server is running on :%s", port)
 	http.ListenAndServe(":"+port, router)
 }
