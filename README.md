@@ -32,8 +32,8 @@ curl http://localhost:8080/
 
 ### APIs
 
-`GET` `/`
-`GET` `/jobs`
-`GET` `/jobs/continent/{continent}`
-`GET` `/jobs/country/{country}`
-`GET` `/jobs/id/{id}`
+`GET` `/` <br/>
+`GET` `/jobs` <br/>
+`GET` `/jobs/continent/{continent}` <br/>
+`GET` `/jobs/country/{country}` <br/>
+`GET` `/jobs/id/{id}` <br/>
